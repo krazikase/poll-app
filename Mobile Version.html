@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Swipe Poll App with Text Input and Yes/No Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+        }
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none; /* Initially hide all cards */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease;
+            padding: 20px;
+        }
+        .card img {
+            width: 80%; /* Adjust width as necessary */
+	    border-radius: 10px;
+    	    margin-bottom: 15px; /* Add spacing between image and question */
+        }
+        .card p {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .input-card input {
+            width: 90%;
+            padding: 10px;
+            margin: 20px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .input-card button {
+            background-color: #2ed573;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin: 10px;
+        }
+        .input-card button:hover {
+            background-color: #55efc4;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .buttons div {
+            background-color: #2ed573;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .buttons div:hover {
+            background-color: #55efc4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card-container" id="card-container">
+    <!-- Cards will be generated dynamically here -->
+</div>
+
+<script>
+    // Define 77 cards - first one is text input, remaining are yes/no questions
+    const cards = [
+        { type: 'text', question: "What's your name?" },
+	{ type: 'yesno', question: "Hike: Laurel Falls Trail: Easy 2.4 Miles", image: "https://www.pigeonforge.com/wp-content/uploads/laurel-falls-fb.webp" },   // Unique question for each yes/no card
+	{ type: 'yesno', question: "Hike: Kuwohi Observation Tower Trail: Moderate 1.3 Miles", image: "https://www.wanderingsmokymountains.com/wp-content/uploads/2024/03/Clingmans-Dome-unintendedone-1024x771.jpg" },
+    	{ type: 'yesno', question: "Hike: Grotto Falls via Trillium Gap Trail: Moderate 2.6 Miles", image: "https://www.nps.gov/grsm/planyourvisit/images/grotto2.jpg?maxwidth=650&autorotate=false" },
+   	{ type: 'yesno', question: "Hike: Rainbow Falls Trail: Moderate 5.4 Miles", image: "https://www.gohikeit.com/wp-content/uploads/2016/05/go-hike-it-mammoth-rainbow-falls-mountain-trail-6-1080x675.jpg" },
+   	{ type: 'yesno', question: "Hike: Chimney Tops Trail: Hard 3.6 Miles", image: "https://friendsofthesmokies.org/wp-content/uploads/2023/07/chimney-tops-burned-summit-linda-spangler-700x466.jpeg" },
+ 	{ type: 'yesno', question: "Hike: Alum Cave Trail to Mount LeConte Hard 11 Miles", image: "https://fatmap-adventure-screenshots.imgix.net/routes/135992-blank.png?auto=compress%2Cformat" },
+    { type: 'yesno', question: "Dollywood ($112.23.00/adult, $101.01/person aged 4-9 & 62+)", image: "https://www.dollywood.com/media/12sjjwdg/smc_general_wildwoodgrove_600x400.png" },
+	{ type: 'yesno', question: "Beyond The Lens! ($22.44/adult , $16.83/kid (ages 4-17)", image: "https://beyondthelens.com/pigeonforge/wp-content/uploads/sites/3/2022/10/BTL-Flyride-Featured-Image2.jpg" },
+	{ type: 'yesno', question: "Ripley's Aquarium* ($46.89/person aged 12+, $30.13/kid aged 6-11, $18.95/kid aged 2-5)", image: "https://seeyousoon.ca/wp-content/uploads/2020/07/Ripleys-Aquarium-of-Canada.jpg" },
+	{ type: 'yesno', question: "Crave Golf ($46.46/person aged 4+)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Rocky Top Coaster ($18/person aged 13+, $14/kid aged 7-12)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Smoky Mountain Alpine Coaster ($19.08/person aged 13+, $15/kid aged 7-12*, $7/kid aged 3-6*; *height restrictions)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Top Jump ($40.67/person, $32.50/'toddler zone'", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Ober Mountain Aerial Tramway ($57.36/person ages 5+)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Gatlinburg SkyPark", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Moonshine Mountain Coaster", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Hellbender at Anakeesta", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Anakeesta Gem Mining", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Wild Stallion Mountain Coaster", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Scenic Helicopter Tours", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Breakout Escape Room Games", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Dinner Show: Paula Deen's Lumberjack Feud ($50.42/person aged 12+, $27.95/kid aged 4-11", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Dinner Show: Dolly Parton's Stampede", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Dinner Show: Pirates Voyage Dinner & Show", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Dinner Show: Hatfield & McCoy Dinner Feud", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Dinner Show: Great Smoky Mountain Murder Mystery", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Redneck Comedy Bus Tour", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Red Skelton Tribute Theater", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Country Tonite ($45/adult, $35/teen aged 13-17, 12&under free; flat $2.00 convenience fee)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Illusionation! The Magic of Jason Hudy", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Comedy Barn", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Legacy Mountain Ziplines ($111.62/person 4+)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Foxfire Adventure Park", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Rafting in the Smokies* ($61.03/person upper river, $52.93/person lower river)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "White water Rafting with Smoky Mountain Outdoors ($59.04/person upper river, $55.66/person lower river)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Wild Laurel Golf Course* ($17-45/golfer; dependent on time and holes)", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Ridge Riders Adventure Rentals", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Big Rock Dude Ranch", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Smoky Mountain Llama Treks", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Gon Ridin' Off Road ATVs", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Hollywood Star Cars Museum", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Appalachian Ghostwalks", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Salt and Pepper Shaker Museum", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "TITANIC Museum", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Gatlinburg Space Needle", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Alcatraz East Crime Museum", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Great Smoky Mountains Heritage Center", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Bush's Visitor Center", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Ogle Cabin", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Battle of Burg Hill & The Old Mill", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Silver Dollar City", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Island Shopping District", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Gatlinburg Craftsmen's Fair", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Three Bears General Store", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Smoky Mountains Outdoor Center", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Incredible Christmas Place", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Smith Creek Distillery", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Sunnyland Farms", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "King's Family Distillery", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Zadie B's Fashions", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Tennessee Cider Company", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Perfect Essentials", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Smoky Mountain Knife Works", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Shack at Glades", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Iron Mountain Metal Craft", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Lid'l Dolly's", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "The Spice & Tea Exchange", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Smoky Cigar Smoke Shop", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Tennessee Homemade Wines", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Smoky Mountain School of Cooking", image: "img/outdoors.jpg" },
+    { type: 'yesno', question: "Pigeon Forge Snow", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Arcadia", image: "img/outdoors.jpg" },
+	{ type: 'yesno', question: "Pink Jeep Tours", image: "img/outdoors.jpg" },
+        ...Array.from({ length: 76 }, (v, i) => ({
+            type: 'yesno',
+            question: `Activity ${i + 2}`
+        }))
+    ];
+
+    // Function to create the first card (text input)
+    function createTextInputCard(card, index) {
+        return `
+            <div class="card" id="card${index}">
+                <p>${card.question}</p>
+                <div class="input-card">
+                    <input type="text" id="text-input" placeholder="Enter your answer...">
+                    <button onclick="submitText(${index})">Submit</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to create yes/no question cards
+    function createYesNoCard(card, index) {
+        return `
+            <div class="card" id="card${index}">
+		<img src="${card.image}" alt="Image for card ${index}">
+                <p>${card.question}</p>
+                <div class="buttons">
+                    <div class="button" onclick="swipeLeft(${index})">Not Interested</div>
+                    <div class="button" onclick="swipeRight(${index})">Interested</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to generate all cards and append them to the container
+    function generateCards() {
+        const container = document.getElementById('card-container');
+        cards.forEach((card, index) => {
+            const cardHTML = card.type === 'text' 
+                ? createTextInputCard(card, index) 
+                : createYesNoCard(card, index);
+            container.innerHTML += cardHTML;
+        });
+
+        // Show the first card
+        document.getElementById('card0').style.display = 'flex';
+    }
+
+    // Function to handle text input submission
+    function submitText(cardIndex) {
+        const inputText = document.getElementById('text-input').value;
+        if (inputText) {
+            alert('Your answer: ' + inputText);
+            document.getElementById(`card${cardIndex}`).style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                document.getElementById(`card${cardIndex}`).style.display = 'none';
+                if (cardIndex + 1 < cards.length) {
+                    document.getElementById(`card${cardIndex + 1}`).style.display = 'flex';
+                }
+            }, 300);
+        } else {
+            alert('Please enter a response.');
+        }
+    }
+
+    // Function to handle swiping left (No)
+    function swipeLeft(cardIndex) {
+        document.getElementById(`card${cardIndex}`).style.transform = 'translateX(-100%)';
+        setTimeout(() => {
+            document.getElementById(`card${cardIndex}`).style.display = 'none';
+            if (cardIndex + 1 < cards.length) {
+                document.getElementById(`card${cardIndex + 1}`).style.display = 'flex';
+            }
+        }, 300);
+    }
+
+    // Function to handle swiping right (Yes)
+    function swipeRight(cardIndex) {
+        document.getElementById(`card${cardIndex}`).style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.getElementById(`card${cardIndex}`).style.display = 'none';
+            if (cardIndex + 1 < cards.length) {
+                document.getElementById(`card${cardIndex + 1}`).style.display = 'flex';
+            }
+        }, 300);
+    }
+
+    // Generate the cards when the page loads
+    window.onload = generateCards;
+</script>
+
+</body>
+</html>
